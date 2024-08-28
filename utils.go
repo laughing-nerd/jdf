@@ -11,7 +11,7 @@ func removeANSIColors(s string) string {
 }
 
 func containsJSON(s string) bool {
-	re := regexp.MustCompile(`\{.*\}|\[.*\]`)
+	re := regexp.MustCompile(`\{(?:[^{}"]*|"(?:[^"\\]|\\.)*"|"(?:[^"\\]|\\.)*":(?:[^{}"]*|"(?:[^"\\]|\\.)*"|[^{}"]*)*)\}`)
 	match := re.FindStringSubmatch(s)
 
 	if len(match) == 0 {
@@ -71,7 +71,6 @@ func getFormattedJSON(s string) (string, error) {
 
 	return string(jsonBytes), nil
 }
-
 
 // TODO: Improve the regex in this function
 func colorizeJSON(jsonStr, keyColor, valueColor string) string {

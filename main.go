@@ -18,10 +18,10 @@ var (
 		"blue":   "\033[96m",
 		"orange": "\033[38;5;222m",
 	}
-  count int
+	count int
 
-  // Flags
-  noColor *bool = flag.Bool("nc", false, "No Color: controls whether the output will be colored or not")
+	// Flags
+	noColor   *bool   = flag.Bool("nc", false, "No Color: controls whether the output will be colored or not")
 	separator *string = flag.String("s", "=", "Sets the separator")
 )
 

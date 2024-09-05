@@ -21,7 +21,6 @@ var (
 	count int
 
 	// Flags
-	noColor   *bool   = flag.Bool("nc", false, "No Color: controls whether the output will be colored or not")
 	separator *string = flag.String("s", "=", "Sets the separator")
 )
 
@@ -68,10 +67,6 @@ func main() {
 		formattedJson, jsonErr := getFormattedJSON(jsonStr)
 		if jsonErr != nil {
 			panic(jsonErr.Error())
-		}
-
-		if !*noColor {
-			formattedJson = colorizeJSON(formattedJson, Colors["blue"], Colors["orange"])
 		}
 
 		fmt.Printf("%s\n%s\n", separatorStr, formattedJson)

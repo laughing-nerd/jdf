@@ -2,8 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"regexp"
+	"sort"
 )
+
+var INDENT = "  "
 
 func removeANSIColors(s string) string {
 	re := regexp.MustCompile(`\x1b\[[0-9;]*m`)
@@ -59,34 +63,66 @@ func getJSON(s string) string {
 }
 
 func getFormattedJSON(s string) (string, error) {
-	var data interface{}
-	err := json.Unmarshal([]byte(s), &data)
-	if err != nil {
-		return "", nil
-	}
-	jsonBytes, err := json.MarshalIndent(data, "", "  ")
+	var toSend string = "{\n"
+	_, err := getJSONMap(s, &toSend)
 	if err != nil {
 		return "", err
 	}
-
-	return string(jsonBytes), nil
+	toSend = toSend[:len(toSend)-2]
+	toSend = toSend + "\n}"
+	return toSend, nil
 }
 
-// TODO: Improve the regex in this function
-func colorizeJSON(jsonStr, keyColor, valueColor string) string {
-	// Regular expressions for keys and values
-	keyPattern := `(?:"[^"]*":)`
-	valuePattern := `(?::\s*("[^"]*"|\d+|true|false|null))`
+func getJSONMap(s string, toSend *string) (map[string]interface{}, error) {
+	var data = make(map[string]interface{})
+	err := json.Unmarshal([]byte(s), &data)
+	if err != nil {
+		return nil, err
+	}
 
-	// Apply color to keys
-	jsonStr = regexp.MustCompile(keyPattern).ReplaceAllStringFunc(jsonStr, func(match string) string {
-		return keyColor + match
-	})
+	// To maintain key order
+	keys := []string{}
+	for key := range data {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
 
-	// Apply color to values
-	jsonStr = regexp.MustCompile(valuePattern).ReplaceAllStringFunc(jsonStr, func(match string) string {
-		return valueColor + match + Colors["reset"]
-	})
+	for _, key := range keys {
+		value := data[key]
+		coloredKey := colorize("\""+key+"\"", Colors["blue"])
+		delete(data, key)
 
-	return jsonStr
+		// TODO: Add support for comma separated array values
+		switch value.(type) {
+		case map[string]interface{}:
+			jsonBytes, err := json.Marshal(value)
+			if err != nil {
+				return nil, err
+			}
+			*toSend = *toSend + INDENT + coloredKey + ": {\n"
+			for range len(INDENT) {
+				INDENT += " "
+			}
+			data[coloredKey], _ = getJSONMap(string(jsonBytes), toSend)
+
+			// After the recursion stack pops
+			INDENT = INDENT[:len(INDENT)-2]
+			*toSend = (*toSend)[:len(*toSend)-2]
+			*toSend = *toSend + INDENT + "\n" + INDENT + "},\n"
+
+		default:
+			coloredValue := ""
+			if _, ok := value.(string); ok {
+				coloredValue = colorize("\""+value.(string)+"\"", Colors["orange"])
+			} else {
+				coloredValue = colorize(value, Colors["green"])
+			}
+			*toSend = fmt.Sprintf("%s%s%s: %v,\n", *toSend, INDENT, coloredKey, coloredValue)
+		}
+	}
+	return data, nil
+}
+
+func colorize[T any](x T, color string) string {
+	return fmt.Sprintf("%s%v%s", color, x, Colors["reset"])
 }

@@ -59,12 +59,13 @@ func getJSON(s string) string {
 	if end == -1 {
 		end = len(s) - 1
 	}
+	fmt.Println(s[:start])
 	return s[start : end+1]
 }
 
 func getFormattedJSON(s string) (string, error) {
 	var toSend string = "{\n"
-	_, err := getJSONMap(s, &toSend)
+	err := getJSONMap(s, &toSend)
 	if err != nil {
 		return "", err
 	}
@@ -73,11 +74,11 @@ func getFormattedJSON(s string) (string, error) {
 	return toSend, nil
 }
 
-func getJSONMap(s string, toSend *string) (map[string]interface{}, error) {
+func getJSONMap(s string, toSend *string) error {
 	var data = make(map[string]interface{})
 	err := json.Unmarshal([]byte(s), &data)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// To maintain key order
@@ -92,24 +93,80 @@ func getJSONMap(s string, toSend *string) (map[string]interface{}, error) {
 		coloredKey := colorize("\""+key+"\"", Colors["blue"])
 		delete(data, key)
 
-		// TODO: Add support for comma separated array values
 		switch value.(type) {
+
+		// ********* Case for nested objects *********
 		case map[string]interface{}:
 			jsonBytes, err := json.Marshal(value)
 			if err != nil {
-				return nil, err
+				return err
 			}
 			*toSend = *toSend + INDENT + coloredKey + ": {\n"
-			for range len(INDENT) {
-				INDENT += " "
+
+			increaseIndent()
+			err = getJSONMap(string(jsonBytes), toSend)
+			if err != nil {
+				return err
 			}
-			data[coloredKey], _ = getJSONMap(string(jsonBytes), toSend)
 
 			// After the recursion stack pops
-			INDENT = INDENT[:len(INDENT)-2]
+			decreaseIndent()
 			*toSend = (*toSend)[:len(*toSend)-2]
 			*toSend = *toSend + INDENT + "\n" + INDENT + "},\n"
 
+		// ********* Case for array *********
+		case []interface{}:
+			arr, ok := value.([]interface{})
+			if ok && len(arr) > 0 {
+				switch arr[0].(type) {
+				case map[string]interface{}:
+
+					// build the json string
+					jsonVal := ""
+					for _, val := range arr {
+						jsonBytes, err := json.Marshal(val)
+						if err != nil {
+							return err
+						}
+
+						increaseIndent()
+						d, _ := getFormattedJSON(string(jsonBytes))
+						decreaseIndent()
+						d = d[:len(d)-1] + INDENT + d[len(d)-1:]
+						jsonVal += d + ",\n" + INDENT
+					} // Loop ends here
+
+					jsonVal = jsonVal[:len(jsonVal)-2]
+					*toSend = *toSend + INDENT + coloredKey + ": [" + jsonVal[:len(jsonVal)-2] + "],\n"
+
+				case string:
+
+					newStr := ""
+					for key, val := range arr {
+						if key == len(arr)-1 {
+							newStr += colorize("\""+val.(string)+"\"", Colors["orange"])
+							continue
+						}
+						newStr += colorize("\""+val.(string)+"\", ", Colors["orange"])
+					}
+					*toSend = *toSend + INDENT + coloredKey + ": [" + newStr + "],\n"
+
+				default:
+					newStr := ""
+					for key, val := range arr {
+						if key == len(arr)-1 {
+							newStr += colorize(val, Colors["green"])
+							continue
+						}
+						newStr += colorize(val, Colors["green"])
+						newStr += colorize(", ", Colors["green"])
+					}
+					*toSend = *toSend + INDENT + coloredKey + ": [" + newStr + "],\n"
+				}
+
+			}
+
+		// ********* Case for strings, numbers or booleans *********
 		default:
 			coloredValue := ""
 			if _, ok := value.(string); ok {
@@ -120,9 +177,16 @@ func getJSONMap(s string, toSend *string) (map[string]interface{}, error) {
 			*toSend = fmt.Sprintf("%s%s%s: %v,\n", *toSend, INDENT, coloredKey, coloredValue)
 		}
 	}
-	return data, nil
+	return nil
 }
 
 func colorize[T any](x T, color string) string {
 	return fmt.Sprintf("%s%v%s", color, x, Colors["reset"])
+}
+
+func increaseIndent() {
+	INDENT += "  "
+}
+func decreaseIndent() {
+	INDENT = INDENT[:len(INDENT)-2]
 }

@@ -58,12 +58,12 @@ func main() {
 
 		s := removeANSIColors(line)
 
-		if !containsJSON(s) {
+		start, jsonStr := getJSON(s)
+		if start == -1 {
 			fmt.Println(line)
 			continue
 		}
 
-		jsonStr := getJSON(s)
 		formattedJson, jsonErr := getFormattedJSON(jsonStr)
 		if jsonErr != nil {
 			panic(jsonErr.Error())

@@ -14,23 +14,7 @@ func removeANSIColors(s string) string {
 	return re.ReplaceAllString(s, "")
 }
 
-func containsJSON(s string) bool {
-	re := regexp.MustCompile(`\{(?:[^{}"]*|"(?:[^"\\]|\\.)*"|"(?:[^"\\]|\\.)*":(?:[^{}"]*|"(?:[^"\\]|\\.)*"|[^{}"]*)*)\}`)
-	match := re.FindStringSubmatch(s)
-
-	if len(match) == 0 {
-		return false
-	}
-
-	var data interface{}
-	err := json.Unmarshal([]byte(match[0]), &data)
-	if err != nil {
-		return false
-	}
-	return true
-}
-
-func getJSON(s string) string {
+func getJSON(s string) (int, string) {
 	var (
 		braces int = 0
 		start  int = -1
@@ -59,8 +43,13 @@ func getJSON(s string) string {
 	if end == -1 {
 		end = len(s) - 1
 	}
+
+	if start == -1 {
+		return -1, ""
+	}
+
 	fmt.Println(s[:start])
-	return s[start : end+1]
+	return start, s[start : end+1]
 }
 
 func getFormattedJSON(s string) (string, error) {
@@ -144,7 +133,7 @@ func getJSONMap(s string, toSend *string) error {
 					newStr := "\n" + INDENT
 					for key, val := range arr {
 						if key == len(arr)-1 {
-              decreaseIndent()
+							decreaseIndent()
 							newStr += colorize("\""+val.(string)+"\"\n"+INDENT, Colors["orange"])
 							continue
 						}

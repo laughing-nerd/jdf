@@ -119,8 +119,8 @@ func getJSONMap(s string, toSend *string) error {
 			arr, ok := value.([]interface{})
 			if ok && len(arr) > 0 {
 				switch arr[0].(type) {
-				case map[string]interface{}:
 
+				case map[string]interface{}:
 					// build the json string
 					jsonVal := ""
 					for _, val := range arr {
@@ -140,14 +140,15 @@ func getJSONMap(s string, toSend *string) error {
 					*toSend = *toSend + INDENT + coloredKey + ": [" + jsonVal[:len(jsonVal)-2] + "],\n"
 
 				case string:
-
-					newStr := ""
+					increaseIndent()
+					newStr := "\n" + INDENT
 					for key, val := range arr {
 						if key == len(arr)-1 {
-							newStr += colorize("\""+val.(string)+"\"", Colors["orange"])
+              decreaseIndent()
+							newStr += colorize("\""+val.(string)+"\"\n"+INDENT, Colors["orange"])
 							continue
 						}
-						newStr += colorize("\""+val.(string)+"\", ", Colors["orange"])
+						newStr += colorize("\""+val.(string)+"\",\n"+INDENT, Colors["orange"])
 					}
 					*toSend = *toSend + INDENT + coloredKey + ": [" + newStr + "],\n"
 

@@ -48,6 +48,11 @@ func getJSON(s string) (int, string) {
 		return -1, ""
 	}
 
+	// Detecting if it is actual json or not
+	if err := json.Unmarshal([]byte(s[start:end+1]), &map[string]interface{}{}); err != nil {
+		return -1, ""
+	}
+
 	fmt.Println(s[:start])
 	return start, s[start : end+1]
 }

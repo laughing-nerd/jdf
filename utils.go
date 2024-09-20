@@ -3,13 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 	"sort"
 )
 
 var (
-  INDENT = "  "
-  	Colors = map[string]string{
+	INDENT = "  "
+	Colors = map[string]string{
 		"reset":  "\033[0m",
 		"red":    "\033[31m",
 		"green":  "\033[32m",
@@ -18,11 +17,6 @@ var (
 		"orange": "\033[38;5;222m",
 	}
 )
-
-func removeANSIColors(s string) string {
-	re := regexp.MustCompile(`\x1b\[[0-9;]*m`)
-	return re.ReplaceAllString(s, "")
-}
 
 func getJSON(s string) (int, string) {
 	var (

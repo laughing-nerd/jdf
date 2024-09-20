@@ -48,9 +48,7 @@ func main() {
 
 		line := scanner.Text()
 
-		s := removeANSIColors(line)
-
-		start, jsonStr := getJSON(s)
+		start, jsonStr := getJSON(line)
 		if start == -1 {
 			fmt.Println(line)
 			continue

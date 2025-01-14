@@ -13,7 +13,7 @@ import (
 
 var (
 	count   int
-	Version string
+	Version string = "v1.1.1"
 )
 
 type winsize struct {

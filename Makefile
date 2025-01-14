@@ -2,7 +2,7 @@ FILES := $(wildcard sample/*)
 
 gobuild:
 	@mkdir -p ./build
-	@go build -ldflags "-X 'main.Version=$(shell git describe --tags)'" -o ./build/jdf
+	@go build -o ./build/jdf
 
 run:
 	@make gobuild && ./build/jdf

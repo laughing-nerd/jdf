@@ -15,9 +15,4 @@ cat file.json | jdf
 I was tired of dealing with the messy devspace logs, so I built this tool based on a colleague's suggestion. It might have some bugs, but it gets the job done effectively! What more can you expect from a tool created in just a couple of hours? XD
 
 # Tests
-In order to execute the tests, run the following command:
-```bash
-make test
-```
-All test cases within the `test` directory will be run at once.
-If you want to add more test cases, add them in the `test` directory and run the above command.
+Todo //🚧

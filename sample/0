@@ -1,0 +1,1 @@
+{"firstName":"Rituraj","lastName":"Paul","age":22,"isStudent":false,"address":{"street":"123 Main St","city":"Unknown","zipCode":"696969",},"phoneNumbers":[{"type":"home","number":"123-456-7890"},{"type":"mobile","number":"987-654-3210"}],"hobbies":["videoGames","more_video_games","EvenMoreVideoGames"]}

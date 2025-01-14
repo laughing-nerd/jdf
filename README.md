@@ -1,5 +1,4 @@
 # jdf - JSON Detect and Format
-(web interface coming soon! Due to code cleanup, the update is delayed)<br />
 As the name suggests, this tool detects and formats JSON data that is piped into into it
 
 Example:

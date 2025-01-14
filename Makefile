@@ -1,15 +1,14 @@
+FILES := $(wildcard sample/*)
+
 gobuild:
 	@mkdir -p ./build
-	@go build -o ./build/jdf
+	@go build -ldflags "-X 'main.Version=$(shell git describe --tags)'" -o ./build/jdf
 
 run:
 	@make gobuild && ./build/jdf
 
-test:
+run-sample:
 	@make gobuild
-	@echo "Running tests..."
-	@for file in tests/*; do \
-		if [ -f "$$file" ]; then \
-			cat "$$file" | ./build/jdf; \
-		fi \
-	done
+	@$(foreach file, $(FILES), \
+		echo "Printing contents of: $(file)" ; cat $(file) | ./build/jdf ; echo ;)
+

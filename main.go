@@ -2,18 +2,18 @@ package main
 
 import (
 	"bufio"
-	"flag"
 	"fmt"
 	"os"
 	"syscall"
 	"unsafe"
+
+	"github.com/laughing-nerd/jdf/src"
+	"github.com/laughing-nerd/jdf/utils"
 )
 
 var (
-	count int
-
-	// Flags
-	separator *string = flag.String("s", "=", "Sets the separator")
+	count   int
+	Version string
 )
 
 type winsize struct {
@@ -23,46 +23,57 @@ type winsize struct {
 
 func init() {
 	ws := &winsize{}
-	retCode, _, errno := syscall.Syscall(syscall.SYS_IOCTL,
+	retCode, _, err := syscall.Syscall(syscall.SYS_IOCTL,
 		uintptr(syscall.Stdout),
 		uintptr(syscall.TIOCGWINSZ),
 		uintptr(unsafe.Pointer(ws)))
 
 	if int(retCode) == -1 {
-		panic(errno)
+		panic("Don't worry! This error is from our side. Apologies 😅\n" + err.Error())
 	}
 	count = int(ws.Col)
 }
 
 func main() {
-	flag.Parse()
+	utils.RegisterFlags()
 
+	// greet the user if no data is piped
+	if isStdinEmpty() {
+		fmt.Println("jdf - JSON Detect and Format 💪\nVersion: " + Version + "\nFor more info, visit: https://github.com/laughing-nerd/jdf")
+		return
+	}
+
+	// Generate separator string
 	var separatorStr string
 	for range count {
-		separatorStr += *separator
+		separatorStr += utils.Separator
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for scanner.Scan() {
-
 		line := scanner.Text()
+		s := utils.RemoveANSIColor(line) // Remove ansi color code if present
 
-		start, jsonStr := getJSON(line)
-		if start == -1 {
+		isJson, start, end := src.DetectJSON(s)
+		if !isJson {
 			fmt.Println(line)
 			continue
 		}
 
-		formattedJson, jsonErr := getFormattedJSON(jsonStr)
-		if jsonErr != nil {
-			panic(jsonErr.Error())
-		}
-
-		fmt.Printf("%s\n%s\n", separatorStr, formattedJson)
+		fmt.Printf("%s\n%s\n", separatorStr, src.FormatJSON(s[start:end+1])) // Display the formatted json
 
 		if err := scanner.Err(); err != nil {
-			panic(err.Error())
+			panic("Don't worry! This error is from our side. Apologies 😅\n" + err.Error())
 		}
 	}
+}
+
+func isStdinEmpty() bool {
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		fmt.Println("Error checking stdin:", err)
+		return false
+	}
+	return (stat.Mode() & os.ModeCharDevice) != 0
 }

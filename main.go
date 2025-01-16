@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	count   int
-	Version string = "v1.1.1"
+	count    int
+	resultch        = make(chan string)
+	Version  string = "v1.1.1"
 )
 
 type winsize struct {
@@ -43,29 +44,48 @@ func main() {
 		return
 	}
 
+	if utils.FlagWebMode {
+		go src.StartServer(resultch)
+	}
+
 	// Generate separator string
 	var separatorStr string
 	for range count {
-		separatorStr += utils.Separator
+		separatorStr += utils.FlagSeparator
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		s := utils.RemoveANSIColor(line) // Remove ansi color code if present
+		// s := utils.RemoveANSIColor(line) // Remove ansi color code if present
 
-		isJson, start, end := src.DetectJSON(s)
+		isJson, start, end := src.DetectJSON(line)
 		if !isJson {
-			fmt.Println(line)
+			if utils.FlagWebMode {
+				resultch <- line
+			} else {
+				fmt.Println(line)
+			}
 			continue
 		}
 
-		fmt.Printf("%s\n%s\n", separatorStr, src.FormatJSON(s[start:end+1])) // Display the formatted json
+		formatted := line[:start] + "\n" + src.FormatJSON(line[start:end+1]) + "\n" + line[end+1:]
+
+		if utils.FlagWebMode {
+			resultch <- formatted
+		} else {
+			fmt.Printf("%s\n%s\n", separatorStr, formatted) // Display the formatted json
+		}
 
 		if err := scanner.Err(); err != nil {
 			panic("Don't worry! This error is from our side. Apologies 😅\n" + err.Error())
 		}
+	}
+
+	// Block indefinitely if web mode is enabled
+	if utils.FlagWebMode {
+		select {}
 	}
 }
 

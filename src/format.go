@@ -8,16 +8,16 @@ import (
 
 func FormatJSON(s string) string {
 	var (
-		indentCount int64  = utils.Indent
+		indentCount int64  = utils.FlagIndent
 		indent      string = ""
 		temp        string = ""
 		result      string = ""
 		quoteStatus int    = -1 // holds the double quote status. -1 means the double quote is not open
 	)
 
-	for _, v := range s {
+	for i, v := range s {
 
-		if v == utils.DOUBLE_QUOTE {
+		if v == utils.DOUBLE_QUOTE && rune(s[i-1]) != utils.BACKSLASH {
 			quoteStatus *= -1
 		}
 
@@ -76,6 +76,8 @@ func getColor(s string) string {
 	s = strings.TrimSpace(s)
 	if strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\"") {
 		return "orange"
+	} else if s == "null" {
+		return "cyan"
 	} else {
 		return "green"
 	}

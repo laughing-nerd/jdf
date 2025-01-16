@@ -8,6 +8,7 @@ const (
 	DOUBLE_QUOTE        rune = '"'
 	COLON               rune = ':'
 	COMMA               rune = ','
+  BACKSLASH           rune = '\\'
 )
 
 func GetPair(val rune) rune {

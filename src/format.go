@@ -77,7 +77,7 @@ func getColor(s string) string {
 	if strings.HasPrefix(s, "\"") && strings.HasSuffix(s, "\"") {
 		return "orange"
 	} else if s == "null" {
-		return "cyan"
+		return "purple"
 	} else {
 		return "green"
 	}

@@ -153,7 +153,7 @@ func GetHTML() string {
 <body>
   <div class="actions">
     <div>
-      <button>Export data</button>
+      <button onclick="alert('The developer is too lazy to add this feature 😪')">Export data</button>
       <button onclick="expandAll()">Expand all</button>
       <button onclick="contractAll()">Contract all</button>
       <button onclick="removeJumps()">Remove jumps</button>

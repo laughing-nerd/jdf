@@ -2,6 +2,7 @@ package src
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
 
@@ -9,8 +10,6 @@ import (
 )
 
 func StartServer(resultch chan string) {
-	fmt.Println("Web mode is enabled. Visit http://localhost:6969")
-
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -41,7 +40,28 @@ func StartServer(resultch chan string) {
 		}
 	})
 
-	if err := http.ListenAndServe(":6969", nil); err != nil {
-		panic("Unable to serve on port 6969\n" + err.Error())
+	port := getFreePort()
+	fmt.Println("Web mode enabled! jdf is running on http://localhost" + port + " 🚀")
+	if err := http.ListenAndServe(port, nil); err != nil {
+		panic("Unable to serve on port " + port + "\n" + err.Error())
 	}
+}
+
+func getFreePort() string {
+	port := utils.FlagPort
+
+	for port < 65535 {
+		listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+		if err == nil {
+      listener.Close()
+			break
+		}
+		fmt.Println("Port", port, "is already in use. Trying next port...")
+		port++
+	}
+
+	if port == 65535 {
+		panic("No free ports available")
+	}
+	return fmt.Sprintf(":%d", port)
 }

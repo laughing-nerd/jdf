@@ -12,7 +12,7 @@ var Colors = map[string][]string{
 	"yellow": {"\033[33m", "<span&nbspcustom;style='color:&nbspcustom;yelow;'>%v</span>"},
 	"blue":   {"\033[96m", "<span&nbspcustom;style='color:&nbspcustom;#6ba99e;'>%v</span>"},
 	"orange": {"\033[38;5;222m", "<span&nbspcustom;style='color:&nbspcustom;#ffd57a;'>%v</span>"},
-	"cyan":   {"\033[94m", "<span&nbspcustom;style='color:&nbspcustom;red;'>%v</span>"},
+	"purple":   {"\033[38;5;13m", "<span&nbspcustom;style='color:&nbspcustom;#D7A2FF;'>%v</span>"},
 }
 
 func Colorize[T any](x T, color string) string {

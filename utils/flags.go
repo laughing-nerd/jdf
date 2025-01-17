@@ -6,6 +6,7 @@ var (
 	FlagSeparator string
 	FlagIndent    int64
 	FlagWebMode   bool
+	FlagPort      int64
 	// Strict    bool
 )
 
@@ -16,6 +17,9 @@ func RegisterFlags() {
 
 	flag.Int64Var(&FlagIndent, "indent", 2, "Sets the indentation")
 	flag.Int64Var(&FlagIndent, "i", 2, "Sets the indentation (shorthand)")
+
+	flag.Int64Var(&FlagPort, "port", 6969, "Sets the port")
+	flag.Int64Var(&FlagPort, "p", 6969, "Sets the port (shorthand)")
 
 	flag.BoolVar(&FlagWebMode, "web", false, "Formats logs and outputs in HTML. Logs are updated in real-time")
 	// flag.BoolVar(&Strict, "strict", false, "Strict JSON checking")

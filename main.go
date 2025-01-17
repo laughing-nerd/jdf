@@ -58,7 +58,6 @@ func main() {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		// s := utils.RemoveANSIColor(line) // Remove ansi color code if present
 
 		isJson, start, end := src.DetectJSON(line)
 		if !isJson {

@@ -17,6 +17,7 @@ func FormatJSON(s string) string {
 
 	for i, v := range s {
 
+		// if the character is " and is not preceded by \, then toggle the quote status
 		if v == utils.DOUBLE_QUOTE && rune(s[i-1]) != utils.BACKSLASH {
 			quoteStatus *= -1
 		}

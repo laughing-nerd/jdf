@@ -8,8 +8,10 @@ import (
 // But, everuthing enclosed within [] or {} might not always be a JSON.
 func DetectJSON(s string) (bool, int, int) {
 	var (
-		startIndex int = -1
-		endIndex   int = -1
+		startIndex  int    = -1
+		endIndex    int    = -1
+		braceStack  []rune = []rune{} // Stack to keep a track of the braces for json detection
+		quoteStatus int    = -1       // holds the double quote status. -1 means the double quote is not open
 	)
 
 	// JSON start index
@@ -33,25 +35,22 @@ func DetectJSON(s string) (bool, int, int) {
 		return false, startIndex, endIndex
 	}
 
-	braceStack := []rune{} // Stack to keep a track of the braces for json detection
-
 	// JSON end index
 	for i, v := range s[startIndex:] {
-		if utils.IsSymmetricPair(v) && len(braceStack) > 0 {
-			lastEle := braceStack[len(braceStack)-1]
-			if lastEle == v {
-				braceStack = braceStack[:len(braceStack)-1]
-			} else {
-				braceStack = append(braceStack, v)
-			}
+
+		// if the character is " and is not preceded by \, then toggle the quote status
+		if v == utils.DOUBLE_QUOTE && rune(s[i-1]) != utils.BACKSLASH {
+			quoteStatus *= -1
 		}
 
-		if utils.IsOpeningPair(v) {
+		// consider the opening pair only if the double quote status is not open
+		if utils.IsOpeningPair(v) && quoteStatus == -1 {
 			braceStack = append(braceStack, utils.GetPair(v))
 			continue
 		}
 
-		if utils.IsClosingPair(v) {
+		// consider the closing pair only if the double quote status is not open
+		if utils.IsClosingPair(v) && quoteStatus == -1 {
 			lastEle := braceStack[len(braceStack)-1]
 			if lastEle != v {
 				return false, startIndex, endIndex
@@ -64,6 +63,10 @@ func DetectJSON(s string) (bool, int, int) {
 			endIndex = i + startIndex
 			break
 		}
+	}
+
+	if quoteStatus == 1 {
+		return false, startIndex, endIndex
 	}
 
 	return true, startIndex, endIndex

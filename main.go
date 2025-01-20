@@ -69,7 +69,16 @@ func main() {
 			continue
 		}
 
-		formatted := line[:start] + "\n" + src.FormatJSON(line[start:end+1]) + "\n" + line[end+1:]
+    formattedPrefix := line[:start]
+    if len(formattedPrefix) > 0 {
+      formattedPrefix += "\n"
+    }
+    formattedSuffix := line[end+1:]
+    if len(formattedSuffix) > 0 {
+      formattedSuffix = "\n" + formattedSuffix
+    }
+
+		formatted := formattedPrefix + src.FormatJSON(line[start:end+1]) + formattedSuffix
 
 		if utils.FlagWebMode {
 			resultch <- formatted

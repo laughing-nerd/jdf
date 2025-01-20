@@ -8,7 +8,7 @@ const (
 	DOUBLE_QUOTE        rune = '"'
 	COLON               rune = ':'
 	COMMA               rune = ','
-  BACKSLASH           rune = '\\'
+	BACKSLASH           rune = '\\'
 )
 
 func GetPair(val rune) rune {
@@ -21,15 +21,6 @@ func GetPair(val rune) rune {
 		return DOUBLE_QUOTE
 	default:
 		return 0
-	}
-}
-
-func IsSymmetricPair(val rune) bool {
-	switch val {
-	case DOUBLE_QUOTE:
-		return true
-	default:
-		return false
 	}
 }
 

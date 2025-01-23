@@ -59,7 +59,8 @@ func main() {
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		isJson, start, end := src.DetectJSON(line)
+    s := utils.RemoveANSIColor(line)
+		isJson, start, end := src.DetectJSON(s)
 		if !isJson {
 			if utils.FlagWebMode {
 				resultch <- line
@@ -69,16 +70,16 @@ func main() {
 			continue
 		}
 
-    formattedPrefix := line[:start]
+    formattedPrefix := s[:start]
     if len(formattedPrefix) > 0 {
       formattedPrefix += "\n"
     }
-    formattedSuffix := line[end+1:]
+    formattedSuffix := s[end+1:]
     if len(formattedSuffix) > 0 {
       formattedSuffix = "\n" + formattedSuffix
     }
 
-		formatted := formattedPrefix + src.FormatJSON(line[start:end+1]) + formattedSuffix
+		formatted := formattedPrefix + src.FormatJSON(s[start:end+1]) + formattedSuffix
 
 		if utils.FlagWebMode {
 			resultch <- formatted

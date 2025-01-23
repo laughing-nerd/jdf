@@ -65,7 +65,8 @@ func DetectJSON(s string) (bool, int, int) {
 		}
 	}
 
-	if quoteStatus == 1 {
+	// If the brace stack is not empty or double quote is opened, then it is not a JSON
+	if len(braceStack) > 0 || quoteStatus == 1 {
 		return false, startIndex, endIndex
 	}
 

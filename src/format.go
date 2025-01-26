@@ -40,6 +40,9 @@ func FormatJSON(s string) string {
 
 		// indent on comma only if the comma is separating two key-value pairs
 		if v == utils.COMMA && quoteStatus == -1 {
+			if !utils.FlagNoEscape {
+				utils.ParseEscape(&temp)
+			}
 			result += utils.Colorize(temp, getColor(temp)) + string(v) + "\n" + indent
 			temp = ""
 			continue
@@ -47,6 +50,9 @@ func FormatJSON(s string) string {
 
 		// indent only if the closing pair is not a part of temp string
 		if utils.IsClosingPair(v) && quoteStatus == -1 {
+			if !utils.FlagNoEscape {
+				utils.ParseEscape(&temp)
+			}
 			indent = updateIndent(indent, -indentCount)
 			result += utils.Colorize(temp, getColor(temp)) + "\n" + indent + string(v)
 			temp = ""

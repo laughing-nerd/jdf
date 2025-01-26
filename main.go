@@ -14,7 +14,7 @@ import (
 var (
 	count    int
 	resultch        = make(chan string)
-	Version  string = "v1.2.2"
+	Version  string = "v1.3.0"
 )
 
 type winsize struct {

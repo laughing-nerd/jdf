@@ -2,7 +2,7 @@ FILES := $(wildcard sample/*)
 
 gobuild:
 	@mkdir -p ./build
-	@go build -o ./build/jdf
+	@CGO_ENABLED=0 go build -ldflags="-s -w" -trimpath -o ./build/jdf .
 
 run:
 	@make gobuild && ./build/jdf

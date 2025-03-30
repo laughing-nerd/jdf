@@ -8,7 +8,6 @@ var (
 	FlagWebMode   bool
 	FlagPort      int64
 	FlagNoEscape  bool
-	// Strict    bool
 )
 
 func RegisterFlags() {
@@ -23,7 +22,6 @@ func RegisterFlags() {
 	flag.Int64Var(&FlagPort, "p", 6969, "Sets the port (shorthand)")
 
 	flag.BoolVar(&FlagWebMode, "web", false, "Formats logs and outputs in HTML. Logs are updated in real-time")
-	// flag.BoolVar(&Strict, "strict", false, "Strict JSON checking")
 
 	flag.BoolVar(&FlagNoEscape, "no-escape", false, "Do not escape special characters")
 	flag.BoolVar(&FlagNoEscape, "ne", false, "Do not escape special characters (shorthand)")

@@ -1,17 +1,17 @@
 package utils
 
 const (
-	CURLY_BRACES_OPEN   rune = '{'
-	CURLY_BRACES_CLOSE  rune = '}'
-	SQUARE_BRACES_OPEN  rune = '['
-	SQUARE_BRACES_CLOSE rune = ']'
-	DOUBLE_QUOTE        rune = '"'
-	COLON               rune = ':'
-	COMMA               rune = ','
-	BACKSLASH           rune = '\\'
+	CURLY_BRACES_OPEN   byte = '{'
+	CURLY_BRACES_CLOSE  byte = '}'
+	SQUARE_BRACES_OPEN  byte = '['
+	SQUARE_BRACES_CLOSE byte = ']'
+	DOUBLE_QUOTE        byte = '"'
+	COLON               byte = ':'
+	COMMA               byte = ','
+	BACKSLASH           byte = '\\'
 )
 
-func GetPair(val rune) rune {
+func GetPair(val byte) byte {
 	switch val {
 	case CURLY_BRACES_OPEN:
 		return CURLY_BRACES_CLOSE
@@ -24,7 +24,7 @@ func GetPair(val rune) rune {
 	}
 }
 
-func IsOpeningPair(val rune) bool {
+func IsOpeningPair(val byte) bool {
 	switch val {
 	case CURLY_BRACES_OPEN, SQUARE_BRACES_OPEN:
 		return true
@@ -33,7 +33,7 @@ func IsOpeningPair(val rune) bool {
 	}
 }
 
-func IsClosingPair(val rune) bool {
+func IsClosingPair(val byte) bool {
 	switch val {
 	case CURLY_BRACES_CLOSE, SQUARE_BRACES_CLOSE:
 		return true

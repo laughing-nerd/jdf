@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"io"
 	"os"
 	"strings"
 	"syscall"
@@ -12,12 +11,10 @@ import (
 	"github.com/laughing-nerd/jdf/utils"
 )
 
-const BUFFERSIZE = 128 * 1024 // 128 KB
-
 var (
 	separatorStr string
-	version  string = "v1.3.1"
-	resultch        = make(chan string)
+	version      string = "v1.3.2"
+	resultch            = make(chan string)
 )
 
 type winsize struct {
@@ -43,17 +40,12 @@ func init() {
 }
 
 func main() {
-	// Creating a buffered reader and writer of 128KB
-	writer := bufio.NewWriterSize(os.Stdout, BUFFERSIZE)
-	reader := bufio.NewReaderSize(os.Stdin, BUFFERSIZE)
-	defer writer.Flush()
 
 	// greet the user if no data is piped
 	if isStdinEmpty() {
-		writer.Write([]byte("jdf - JSON Detect and Format 💪\nVersion: "))
-		writer.Write([]byte(version))
-		writer.Write([]byte("\nFor more info, visit: https://github.com/laughing-nerd/jdf\n"))
-		writer.Flush()
+		os.Stdout.Write([]byte("jdf - JSON Detect and Format 💪\nVersion: "))
+		os.Stdout.Write([]byte(version))
+		os.Stdout.Write([]byte("\nFor more info, visit: https://github.com/laughing-nerd/jdf\n"))
 		return
 	}
 
@@ -61,15 +53,9 @@ func main() {
 		go src.StartServer(resultch)
 	}
 
-	for {
-		line, err := reader.ReadString('\n')
-
-		if err != nil {
-			// break out of the loop in case of eof with no data
-			if err == io.EOF && len(line) == 0 {
-				break
-			}
-		}
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		line := scanner.Text()
 
 		s := utils.RemoveANSIColor(line)
 
@@ -79,6 +65,7 @@ func main() {
 				resultch <- line
 			} else {
 				os.Stdout.Write([]byte(line))
+				os.Stdout.Write([]byte("\n"))
 			}
 			continue
 		}
@@ -101,8 +88,13 @@ func main() {
 		if utils.FlagWebMode {
 			resultch <- formatted.String()
 		} else {
-			writer.Write([]byte(separatorStr))
-			writer.Write([]byte(formatted.String()))
+			os.Stdout.Write([]byte(separatorStr))
+			os.Stdout.Write([]byte(formatted.String()))
+			os.Stdout.Write([]byte("\n"))
+		}
+
+		if err := scanner.Err(); err != nil {
+			panic("Don't worry! This error is from our side. Apologies 😅\n" + err.Error())
 		}
 	}
 

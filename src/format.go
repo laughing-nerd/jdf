@@ -123,7 +123,7 @@ func FormatJSON(s string) string {
 					continue
 				}
 
-				// Numbers will be white for now. Might change later
+				// Numbers will be in default color for now. Might change later
 			}
 
 			buffer.WriteByte(char)

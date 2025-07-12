@@ -4,11 +4,10 @@ import (
 	"bufio"
 	"os"
 	"strings"
-	"syscall"
-	"unsafe"
 
 	"github.com/laughing-nerd/jdf/src"
 	"github.com/laughing-nerd/jdf/utils"
+	"github.com/laughing-nerd/jdf/utils/term"
 )
 
 var (
@@ -24,19 +23,7 @@ type winsize struct {
 
 func init() {
 	utils.RegisterFlags()
-
-	ws := &winsize{}
-	retCode, _, err := syscall.Syscall(syscall.SYS_IOCTL,
-		uintptr(syscall.Stdout),
-		uintptr(syscall.TIOCGWINSZ),
-		uintptr(unsafe.Pointer(ws)))
-
-	if int(retCode) == -1 {
-		panic("Don't worry! This error is from our side. Apologies 😅\n" + err.Error())
-	}
-
-	// Generate separatorString
-	separatorStr = strings.Repeat(utils.FlagSeparator, int(ws.Col))
+	separatorStr = term.InitSeparator(utils.FlagSeparator)
 }
 
 func main() {

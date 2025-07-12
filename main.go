@@ -12,7 +12,7 @@ import (
 
 var (
 	separatorStr string
-	version      string = "v1.3.2"
+	version      string = "v0.0.0"
 	resultch            = make(chan string)
 )
 

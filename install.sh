@@ -1,10 +1,10 @@
 #!/bin/bash
 #
 # JDF Installer Script
-# Usage: curl -fsSL https://raw.githubusercontent.com/laughing-nerd/jdf/master/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/laughing-nerd/jdf/main/install.sh | bash
 #
 # Or with a specific version:
-# curl -fsSL https://raw.githubusercontent.com/laughing-nerd/jdf/master/install.sh | bash -s -- v1.0.0
+# curl -fsSL https://raw.githubusercontent.com/laughing-nerd/jdf/main/install.sh | bash -s -- v1.0.0
 #
 
 set -e
@@ -101,23 +101,76 @@ get_install_dir() {
     echo "$user_bin"
 }
 
-check_path() {
+check_and_update_path() {
     local install_dir="$1"
-    if [[ ":$PATH:" != *":$install_dir:"* ]]; then
-        log_warn "$install_dir is not in your PATH"
-        echo ""
-        echo "Add it to your shell profile:"
-        echo ""
-        echo -e "  ${CYAN}# For bash (~/.bashrc or ~/.bash_profile)${NC}"
-        echo -e "  export PATH=\"\$PATH:$install_dir\""
-        echo ""
-        echo -e "  ${CYAN}# For zsh (~/.zshrc)${NC}"
-        echo -e "  export PATH=\"\$PATH:$install_dir\""
-        echo ""
-        echo -e "  ${CYAN}# For fish (~/.config/fish/config.fish)${NC}"
-        echo -e "  set -gx PATH \$PATH $install_dir"
-        echo ""
+    
+    if [[ ":$PATH:" == *":$install_dir:"* ]]; then
+        return 0  # Already in PATH
     fi
+    
+    log_warn "$install_dir is not in your PATH"
+    echo ""
+    
+    # Detect shell and config file
+    local shell_name
+    local config_file
+    shell_name=$(basename "$SHELL")
+    
+    case "$shell_name" in
+        zsh)
+            config_file="$HOME/.zshrc"
+            ;;
+        bash)
+            if [[ -f "$HOME/.bash_profile" ]]; then
+                config_file="$HOME/.bash_profile"
+            else
+                config_file="$HOME/.bashrc"
+            fi
+            ;;
+        fish)
+            config_file="$HOME/.config/fish/config.fish"
+            ;;
+        *)
+            config_file=""
+            ;;
+    esac
+    
+    local path_line="export PATH=\"\$PATH:$install_dir\""
+    if [[ "$shell_name" == "fish" ]]; then
+        path_line="set -gx PATH \$PATH $install_dir"
+    fi
+    
+    # Ask user if they want to auto-add to PATH
+    if [[ -n "$config_file" && -t 0 ]]; then
+        echo -e "Would you like to add it to ${CYAN}$config_file${NC} automatically? [Y/n] "
+        read -r response
+        response=${response:-Y}
+        
+        if [[ "$response" =~ ^[Yy]$ ]]; then
+            echo "" >> "$config_file"
+            echo "# Added by jdf installer" >> "$config_file"
+            echo "$path_line" >> "$config_file"
+            log_success "Added to $config_file"
+            echo ""
+            echo -e "Run this to use jdf now: ${CYAN}source $config_file${NC}"
+            echo -e "Or restart your terminal."
+            return 0
+        fi
+    fi
+    
+    # Manual instructions
+    echo "Add this to your shell profile manually:"
+    echo ""
+    echo -e "  ${CYAN}# For bash (~/.bashrc or ~/.bash_profile)${NC}"
+    echo -e "  export PATH=\"\$PATH:$install_dir\""
+    echo ""
+    echo -e "  ${CYAN}# For zsh (~/.zshrc)${NC}"
+    echo -e "  export PATH=\"\$PATH:$install_dir\""
+    echo ""
+    echo -e "  ${CYAN}# For fish (~/.config/fish/config.fish)${NC}"
+    echo -e "  set -gx PATH \$PATH $install_dir"
+    echo ""
+    echo -e "Then run: ${CYAN}source ~/.zshrc${NC} (or restart your terminal)"
 }
 
 download_and_install() {
@@ -209,8 +262,8 @@ main() {
     
     echo ""
     
-    # Check PATH
-    check_path "$install_dir"
+    # Check and update PATH if needed
+    check_and_update_path "$install_dir"
     
     # Verify
     verify_installation

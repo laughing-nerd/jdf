@@ -16,13 +16,13 @@ cat file.json | jdf
 ### Quick Install (Recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/laughing-nerd/jdf/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/laughing-nerd/jdf/main/install.sh | bash
 ```
 
 ### Install Specific Version
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/laughing-nerd/jdf/master/install.sh | bash -s -- v1.0.0
+curl -fsSL https://raw.githubusercontent.com/laughing-nerd/jdf/main/install.sh | bash -s -- v1.0.0
 ```
 
 ### Manual Download

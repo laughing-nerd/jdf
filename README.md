@@ -11,6 +11,32 @@ If you want to pretty print the JSON data stored in a file, you can do so by run
 cat file.json | jdf
 ```
 
+# Installation
+
+### Quick Install (Recommended)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/laughing-nerd/jdf/master/install.sh | bash
+```
+
+### Install Specific Version
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/laughing-nerd/jdf/master/install.sh | bash -s -- v1.0.0
+```
+
+### Manual Download
+
+Download the binary for your platform from the [Releases](https://github.com/laughing-nerd/jdf/releases) page.
+
+### Build from Source
+
+```bash
+git clone https://github.com/laughing-nerd/jdf.git
+cd jdf
+make build-all
+```
+
 # Motivation
 I was tired of dealing with the messy devspace logs, so I built this tool based on a colleague's suggestion. It might have some bugs, but it gets the job done effectively! What more can you expect from a tool created in just a couple of hours? XD
 

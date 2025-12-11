@@ -41,3 +41,17 @@ func IsClosingPair(val byte) bool {
 		return false
 	}
 }
+
+// IsEscaped returns true if the character at position i is escaped.
+// It counts consecutive backslashes before position i.
+// An odd number of backslashes means the character is escaped.
+func IsEscaped(s string, i int) bool {
+	if i <= 0 {
+		return false
+	}
+	backslashCount := 0
+	for j := i - 1; j >= 0 && s[j] == BACKSLASH; j-- {
+		backslashCount++
+	}
+	return backslashCount%2 == 1
+}

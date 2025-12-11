@@ -2,7 +2,6 @@ package src
 
 import (
 	"bytes"
-	"strings"
 
 	"github.com/laughing-nerd/jdf/utils"
 )
@@ -30,8 +29,9 @@ func FormatJSON(s string) string {
 			continue
 		}
 
-		// if the character is " and is not preceded by \ or is the first character, then toggle the quote status since this is a part of json format
-		if char == utils.DOUBLE_QUOTE && (i == 0 || s[i-1] != utils.BACKSLASH) {
+		// if the character is " and is not escaped, then toggle the quote status since this is a part of json format
+		// using IsEscaped to properly handle cases like \\" (escaped backslash followed by quote)
+		if char == utils.DOUBLE_QUOTE && !utils.IsEscaped(s, i) {
 			quoteStatus = !quoteStatus
 
 			// There's probably a better way to do this. But as of now, this is the best way I can think of
@@ -53,9 +53,25 @@ func FormatJSON(s string) string {
 		case utils.CURLY_BRACES_OPEN, utils.SQUARE_BRACES_OPEN:
 			buffer.WriteByte(char)
 			if !quoteStatus {
+				// keep on single line if it is empty {} or []
+				closingChar := utils.CURLY_BRACES_CLOSE
+				if char == utils.SQUARE_BRACES_OPEN {
+					closingChar = utils.SQUARE_BRACES_CLOSE
+				}
+
+				if isEmptyBracket(s, i, closingChar) {
+					// skip whitespace and write closing bracket directly
+					for i+1 < len(s) && (s[i+1] == ' ' || s[i+1] == '\t' || s[i+1] == '\n' || s[i+1] == '\r') {
+						i++
+					}
+					i++ // skip to closing bracket
+					buffer.WriteByte(closingChar)
+					continue
+				}
+
 				indent++
 				buffer.WriteByte('\n')
-				buffer.WriteString(strings.Repeat("  ", indent))
+				buffer.WriteString(utils.GetIndentString(indent))
 
 				// Increment array depth if it's a [. But when there's a {, it's a key. So set keyStatus to true
 				if char == utils.SQUARE_BRACES_OPEN {
@@ -70,7 +86,7 @@ func FormatJSON(s string) string {
 			if !quoteStatus {
 				indent--
 				buffer.WriteByte('\n')
-				buffer.WriteString(strings.Repeat("  ", indent))
+				buffer.WriteString(utils.GetIndentString(indent))
 
 				// Only decrement inArray if inArray has a certain depth. Else no point in decrementing
 				if char == utils.SQUARE_BRACES_CLOSE && inArray > 0 {
@@ -88,7 +104,7 @@ func FormatJSON(s string) string {
 					keyStatus = true
 				}
 				buffer.WriteByte('\n')
-				buffer.WriteString(strings.Repeat("  ", indent))
+				buffer.WriteString(utils.GetIndentString(indent))
 			}
 
 		case utils.COLON:
@@ -101,21 +117,26 @@ func FormatJSON(s string) string {
 		default:
 			// Check for boolean
 			if !quoteStatus {
-				if char == 't' || char == 'T' || char == 'f' || char == 'F' {
+				// check for true (with bounds check)
+				if (char == 't' || char == 'T') && i+4 <= len(s) {
 					buffer.WriteString(utils.Colorize("", "green"))
-					if char == 't' || char == 'T' {
-						buffer.Write([]byte(s[i : i+4]))
-						i += 3
-					} else {
-						buffer.Write([]byte(s[i : i+5]))
-						i += 4
-					}
+					buffer.Write([]byte(s[i : i+4]))
+					i += 3
 					buffer.WriteString(utils.Colorize("", "reset"))
 					continue
 				}
 
-				// Check for null
-				if char == 'n' || char == 'N' {
+				// check for false (with bounds check)
+				if (char == 'f' || char == 'F') && i+5 <= len(s) {
+					buffer.WriteString(utils.Colorize("", "green"))
+					buffer.Write([]byte(s[i : i+5]))
+					i += 4
+					buffer.WriteString(utils.Colorize("", "reset"))
+					continue
+				}
+
+				// check for null (with bounds check)
+				if (char == 'n' || char == 'N') && i+4 <= len(s) {
 					buffer.WriteString(utils.Colorize("", "purple"))
 					buffer.Write([]byte(s[i : i+4]))
 					buffer.WriteString(utils.Colorize("", "reset"))
@@ -131,4 +152,16 @@ func FormatJSON(s string) string {
 	}
 
 	return buffer.String()
+}
+
+// isEmptyBracket checks if the next non-whitespace character after position i is the closing bracket
+func isEmptyBracket(s string, i int, closingChar byte) bool {
+	for j := i + 1; j < len(s); j++ {
+		c := s[j]
+		if c == ' ' || c == '\t' || c == '\n' || c == '\r' {
+			continue
+		}
+		return c == closingChar
+	}
+	return false
 }

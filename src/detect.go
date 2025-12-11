@@ -5,13 +5,13 @@ import (
 )
 
 // According to this function, JSON is something that is enclosed within [] or {}
-// But, everuthing enclosed within [] or {} might not always be a JSON.
+// But, everything enclosed within [] or {} might not always be a JSON.
 func DetectJSON(s string) (bool, int, int) {
 	var (
-		startIndex int    = -1
-		endIndex   int    = -1
-		braceStack []byte = []byte{} // Stack to keep a track of the braces for json detection
-		quoteStatus bool = false // holds the double quote status. -1 means the double quote is not open
+		startIndex  int    = -1
+		endIndex    int    = -1
+		braceStack  []byte = []byte{} // Stack to keep a track of the braces for json detection
+		quoteStatus bool   = false    // holds the double quote status. -1 means the double quote is not open
 	)
 
 	// JSON start index
@@ -39,8 +39,9 @@ func DetectJSON(s string) (bool, int, int) {
 	// for i, v := range s[startIndex:] {
 	for i := startIndex; i < len(s); i++ {
 
-		// if the character is " and is not preceded by \, then toggle the quote status
-		if s[i] == utils.DOUBLE_QUOTE && s[i-1] != utils.BACKSLASH {
+		// if the character is " and is not escaped, then toggle the quote status
+		// Using IsEscaped to properly handle cases like \\" (escaped backslash followed by quote)
+		if s[i] == utils.DOUBLE_QUOTE && !utils.IsEscaped(s, i) {
 			quoteStatus = !quoteStatus
 		}
 
@@ -54,6 +55,10 @@ func DetectJSON(s string) (bool, int, int) {
 
 			// consider the closing pair only if the double quote status is not open
 			if utils.IsClosingPair(s[i]) {
+				if len(braceStack) == 0 {
+					return false, startIndex, endIndex
+				}
+
 				lastEle := braceStack[len(braceStack)-1]
 				if lastEle != s[i] {
 					return false, startIndex, endIndex

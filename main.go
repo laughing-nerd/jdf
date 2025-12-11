@@ -16,11 +16,6 @@ var (
 	resultch            = make(chan string)
 )
 
-type winsize struct {
-	Row uint16
-	Col uint16
-}
-
 func init() {
 	utils.RegisterFlags()
 	separatorStr = term.InitSeparator(utils.FlagSeparator)
@@ -41,6 +36,7 @@ func main() {
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Buffer(nil, 10<<20) // max buf size 10 MB
 	for scanner.Scan() {
 		line := scanner.Text()
 

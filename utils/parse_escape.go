@@ -10,7 +10,7 @@ var escapeSequences = map[string]string{
 	// '\"': `"`,  // Double Quote
 	`\\`: `\`, // Backslash
 	// \/': "/",  // Forward Slash
-	`\'`: `'`,   // Single Quote
+	`\'`: `'`,  // Single Quote
 	`\b`: "\b", // Backspace
 	`\f`: "\f", // Form Feed
 	`\v`: "\v", // Vertical Tab
@@ -29,11 +29,12 @@ func ParseEscape(s string, i int) (string, int) {
 		}
 	}
 
-	// Handle normal escape sequences
-	if val, ok := escapeSequences[s[i:i+2]]; ok {
-		return val, 1
+	// Handle normal escape sequences (with bounds check)
+	if i+1 < len(s) {
+		if val, ok := escapeSequences[s[i:i+2]]; ok {
+			return val, 1
+		}
 	}
-	
+
 	return string(s[i]), 0
 }
-

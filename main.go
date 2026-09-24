@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 
@@ -23,6 +24,7 @@ func init() {
 
 func main() {
 
+	fmt.Println("jdf - JSON Detect and Format 💪\nVersion: ", version)
 	// greet the user if no data is piped
 	if isStdinEmpty() {
 		os.Stdout.Write([]byte("jdf - JSON Detect and Format 💪\nVersion: "))
